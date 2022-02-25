@@ -8,13 +8,14 @@ const scale = 3;
 const canvasSize = 1000;
 const movementSpeed = .2;
 const wallPushSpeed = .1;
+const gestureSpeed = .1;
 const drag = 5;
 
 /* objects */
 const speed = { x: 0, y: 0};
 const position = { x: .265, y: .925};
 const activeKeys = {};
-const input = { left: false, right: false, up: false, down: false };
+const input = { left: false, right: false, up: false, down: false, dragging: false, horizontal: 0, vertical: 0 };
 
 /* variables */
 let timestamp = undefined;
@@ -42,14 +43,19 @@ function update(t) {
 }
 
 document.onkeydown = (ev) => {
-  updateInput(ev.key, true);
+  updateKeyInput(ev.key, true);
 };
 
 document.onkeyup = (ev) => {
-  updateInput(ev.key, false);
+  updateKeyInput(ev.key, false);
 };
 
-function updateInput(key, value) {
+document.addEventListener('pointerdown', (event) => toggleDragInput(event, true));
+document.addEventListener('pointermove', (event) => updateDragInput(event));
+document.addEventListener('pointerup', (event) => toggleDragInput(event, false));
+document.addEventListener('pointercancel', (event) => toggleDragInput(event, false));
+
+function updateKeyInput(key, value) {
   if (value && !!activeKeys[key] || !value && !activeKeys[key]) return;
 
   activeKeys[key] = value;
@@ -58,6 +64,20 @@ function updateInput(key, value) {
   if (key === 'a' || key === 'ArrowLeft') input.left = value;
   if (key === 's' || key === 'ArrowDown') input.down = value;
   if (key === 'w' || key === 'ArrowUp') input.up = value;
+}
+
+function toggleDragInput(event, active) {
+  event.preventDefault();
+  activeKeys.movementX = 0;
+  activeKeys.movementY = 0;
+  input.dragging = active;
+}
+
+function updateDragInput(event) {
+  event.preventDefault();
+
+  input.horizontal = -event.movementX * gestureSpeed;
+  input.vertical = -event.movementY * gestureSpeed;
 }
 
 function updatePosition(deltaTime) {
@@ -78,21 +98,29 @@ function applyDrag(deltaTime) {
 }
 
 function updateSpeedFromInput(deltaTime) {
-  let horizontal = 0;
-  let vertical = 0;
+  let horizontal = input.dragging ? input.horizontal : 0;
+  let vertical = input.dragging ? input.vertical : 0;
+  
+  input.horizontal = 0;
+  input.vertical = 0;
 
   if (input.right) horizontal++;
   if (input.left) horizontal--;
   if (input.down) vertical++;
   if (input.up) vertical--;
-
-  const axisSpeed = horizontal !== 0 && vertical !== 0 ? .7071 * movementSpeed : movementSpeed;
+  
+  const speedCorrection = Math.sqrt(Math.pow(horizontal, 2) + Math.pow(vertical, 2));
+  
+  if (speedCorrection > (input.dragging ? 5 : 1)) {
+    horizontal /= speedCorrection;
+    vertical /= speedCorrection;
+  }
 
   if (horizontal !== 0) {
-    speed.x = horizontal * axisSpeed * deltaTime / 1000;
+    speed.x = horizontal * movementSpeed * deltaTime / 1000;
   }
   if (vertical !== 0) {
-    speed.y = vertical * axisSpeed * deltaTime / 1000;
+    speed.y = vertical * movementSpeed * deltaTime / 1000;
   }
 }
 
