@@ -20,7 +20,8 @@ main {
 
 .game-wrapper {
     position: relative;
-    flex-grow: 1;
+    width: calc(100vmin - 20px);
+    height: calc(100vmin - 20px);
     margin: 10px;
     overflow: hidden;
     border-radius: 5%;
