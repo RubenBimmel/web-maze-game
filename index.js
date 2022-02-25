@@ -8,8 +8,8 @@ const scale = 3;
 const canvasSize = 1000;
 const movementSpeed = .2;
 const wallPushSpeed = .1;
-const gestureSpeed = .005;
-const dragSpeedLimit = 3;
+const gestureSpeed = .1;
+const dragSpeedLimit = 2.5;
 const drag = 5;
 
 /* objects */
@@ -82,8 +82,8 @@ function updateDragInput(event) {
   if (!input.dragging) return;
 
   event.preventDefault();
-  input.horizontal += -event.movementX * gestureSpeed;
-  input.vertical += -event.movementY * gestureSpeed;
+  input.horizontal = -event.movementX * gestureSpeed;
+  input.vertical = -event.movementY * gestureSpeed;
 }
 
 function updatePosition(deltaTime) {
@@ -106,8 +106,9 @@ function applyDrag(deltaTime) {
 function updateSpeedFromInput(deltaTime) {
   let horizontal = input.dragging ? input.horizontal : 0;
   let vertical = input.dragging ? input.vertical : 0;
-  
-  console.log({horizontal, vertical});
+
+  input.horizontal = 0;
+  input.vertical = 0;
 
   if (input.right) horizontal += input.down || input.up ? .7071 : 1;
   if (input.left) horizontal -= input.down || input.up ? .7071 : 1;
