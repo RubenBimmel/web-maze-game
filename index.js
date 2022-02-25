@@ -8,7 +8,8 @@ const scale = 3;
 const canvasSize = 1000;
 const movementSpeed = .2;
 const wallPushSpeed = .1;
-const gestureSpeed = .1;
+const gestureSpeed = .005;
+const dragSpeedLimit = 3;
 const drag = 5;
 
 /* objects */
@@ -67,17 +68,22 @@ function updateKeyInput(key, value) {
 }
 
 function toggleDragInput(event, active) {
+  if (active && !!input.dragging || !active && !input.dragging) {
+    return;
+  }
+
   event.preventDefault();
-  activeKeys.movementX = 0;
-  activeKeys.movementY = 0;
+  input.horizontal = 0;
+  input.vertical = 0;
   input.dragging = active;
 }
 
 function updateDragInput(event) {
-  event.preventDefault();
+  if (!input.dragging) return;
 
-  input.horizontal = -event.movementX * gestureSpeed;
-  input.vertical = -event.movementY * gestureSpeed;
+  event.preventDefault();
+  input.horizontal += -event.movementX * gestureSpeed;
+  input.vertical += -event.movementY * gestureSpeed;
 }
 
 function updatePosition(deltaTime) {
@@ -101,19 +107,18 @@ function updateSpeedFromInput(deltaTime) {
   let horizontal = input.dragging ? input.horizontal : 0;
   let vertical = input.dragging ? input.vertical : 0;
   
-  input.horizontal = 0;
-  input.vertical = 0;
+  console.log({horizontal, vertical});
 
-  if (input.right) horizontal++;
-  if (input.left) horizontal--;
-  if (input.down) vertical++;
-  if (input.up) vertical--;
+  if (input.right) horizontal += input.down || input.up ? .7071 : 1;
+  if (input.left) horizontal -= input.down || input.up ? .7071 : 1;
+  if (input.down) vertical += input.right || input.left ? .7071 : 1;
+  if (input.up) vertical -= input.right || input.left ? .7071 : 1;
   
-  const speedCorrection = Math.sqrt(Math.pow(horizontal, 2) + Math.pow(vertical, 2));
+  const totalSpeed = Math.sqrt(Math.pow(horizontal, 2) + Math.pow(vertical, 2));
   
-  if (speedCorrection > (input.dragging ? 5 : 1)) {
-    horizontal /= speedCorrection;
-    vertical /= speedCorrection;
+  if (totalSpeed > dragSpeedLimit) {
+    horizontal /= (totalSpeed / dragSpeedLimit);
+    vertical /= (totalSpeed / dragSpeedLimit);
   }
 
   if (horizontal !== 0) {
@@ -136,6 +141,7 @@ function updateSpeedFromMaze(deltaTime) {
   if (wallLeft) input.left = false;
   if (wallDown) input.down = false;
   if (wallUp) input.up = false;
+  if (wallRight || wallLeft || wallDown || wallUp) input.dragging = false;
 
   let horizontal = wallRight ? -1 : wallLeft ? 1 : 0;
   let vertical = wallDown ? -1 : wallUp ? 1 : 0;
