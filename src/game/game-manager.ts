@@ -142,8 +142,6 @@ function updateSpeedFromMaze(deltaTime: number) {
   const wallDown = checks.down[0] + checks.down[1] + checks.down[2] < 20;
   const wallUp = checks.up[0] + checks.up[1] + checks.up[2] < 20;
 
-  console.log({ wallRight, wallLeft, wallUp, wallDown });
-  
   if (wallRight) input.right = false;
   if (wallLeft) input.left = false;
   if (wallDown) input.down = false;
