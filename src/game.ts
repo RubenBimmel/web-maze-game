@@ -5,6 +5,7 @@ import { initialize } from './game/game-manager.js';
 
 const width = 10;
 const height = 10;
+const maxBranchDistance = 15;
 const style: Style = {
   wallColor: '#000000',
   cellColor: '#FFFFFF',
@@ -19,7 +20,7 @@ const canvas = document.createElement('canvas') as HTMLCanvasElement;
 canvas.width = style.wallSize + width * (style.cellSize + style.wallSize);
 canvas.height = style.wallSize + height * (style.cellSize + style.wallSize);
 
-const maze = generateMaze(generateGrid({ type: GridTypes.Rectangle, width, height }));
+const maze = generateMaze(generateGrid({ type: GridTypes.Rectangle, width, height, maxBranchDistance }));
 const renderer = new Renderer(canvas, maze, style);
 
 renderer.draw();

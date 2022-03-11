@@ -14,10 +14,14 @@ function generateMazeCells(grid, start) {
     const visitedCells = [start];
     const cells = grid.cells.map((cell) => (Object.assign(Object.assign({}, cell), { connections: [], distance: 0 })));
     let currentIndex = start;
+    let currentBranchDistance = 0;
     while (visitedCells.length < cells.length) {
         const availableNeighbours = cells[currentIndex].neighbours.filter((n) => visitedCells.indexOf(n) === -1);
-        if (availableNeighbours.length === 0) {
+        if (availableNeighbours.length === 0 || currentBranchDistance >= grid.settings.maxBranchDistance) {
+            if (currentBranchDistance >= grid.settings.maxBranchDistance)
+                console.log('MAX BRANCH DISTANCE REACHED!');
             currentIndex = visitedCells[visitedCells.indexOf(currentIndex) - 1];
+            currentBranchDistance = 0;
             continue;
         }
         const nextIndex = availableNeighbours[Math.floor(Math.random() * availableNeighbours.length)];
@@ -26,6 +30,7 @@ function generateMazeCells(grid, start) {
         cells[nextIndex].distance = cells[currentIndex].distance + 1;
         visitedCells.push(nextIndex);
         currentIndex = nextIndex;
+        currentBranchDistance++;
     }
     return cells;
 }

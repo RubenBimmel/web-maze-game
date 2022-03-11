@@ -13,6 +13,7 @@ export interface RectangleGridSettings {
   type: GridTypes.Rectangle;
   width: number;
   height: number;
+  maxBranchDistance: number;
 }
 
 export interface Position {

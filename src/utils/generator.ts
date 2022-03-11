@@ -29,12 +29,14 @@ function generateMazeCells(grid: Grid, start: number) {
   const visitedCells = [start];
   const cells: MazeCell[] = grid.cells.map((cell) => ({ ...cell, connections: [], distance: 0 }));
   let currentIndex = start;
+  let currentBranchDistance = 0;
 
   while (visitedCells.length < cells.length) {
     const availableNeighbours = cells[currentIndex].neighbours.filter((n) => visitedCells.indexOf(n) === -1);
 
-    if (availableNeighbours.length === 0) {
+    if (availableNeighbours.length === 0 || currentBranchDistance >= grid.settings.maxBranchDistance) {
       currentIndex = visitedCells[visitedCells.indexOf(currentIndex) - 1];
+      currentBranchDistance = 0;
       continue;
     }
 
@@ -46,6 +48,7 @@ function generateMazeCells(grid: Grid, start: number) {
 
     visitedCells.push(nextIndex);
     currentIndex = nextIndex;
+    currentBranchDistance++;
   }
   
   return cells;
