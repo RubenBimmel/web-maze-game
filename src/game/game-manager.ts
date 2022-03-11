@@ -1,11 +1,12 @@
 /* elements */
-const canvas = document.createElement('canvas');
-const ctx = canvas.getContext('2d');
-const sourceImage = document.getElementById('source-image');
+import { Maze } from '../utils/generator';
+
+let canvas: HTMLCanvasElement;
+let ctx: CanvasRenderingContext2D;
+const sourceImage = document.getElementById('source-image') as HTMLImageElement;
 
 /* constants */
 const scale = 3;
-const canvasSize = 1000;
 const movementSpeed = .2;
 const wallPushSpeed = .1;
 const gestureSpeed = .1;
@@ -13,24 +14,27 @@ const dragSpeedLimit = 2.5;
 const drag = 5;
 
 /* objects */
-const speed = { x: 0, y: 0};
-const position = { x: .265, y: .925};
-const activeKeys = {};
+const speed = { x: 0, y: 0 };
+const position = { x: 0, y: 0 };
+const activeKeys: { [key: string]: boolean } = {};
 const input = { left: false, right: false, up: false, down: false, dragging: false, horizontal: 0, vertical: 0 };
 
 /* variables */
-let timestamp = undefined;
+let timestamp: number | undefined = undefined;
 let finished = false;
 
-function initialize() {
-  canvas.width = canvasSize;
-  canvas.height = canvasSize;
-  ctx.drawImage(sourceImage, 0, 0, canvasSize, canvasSize);
+export function initialize(c: HTMLCanvasElement, maze: Maze) {
+  canvas = c;
+  ctx = canvas.getContext('2d');
+  sourceImage.src = canvas.toDataURL();
+  const startCell = maze.cells[maze.start];
+  position.x = (startCell.position.x + .5) / maze.settings.width;
+  position.y = (startCell.position.y + .5) / maze.settings.height;
 
   window.requestAnimationFrame(update);
 }
 
-function update(t) {
+function update(t: number) {
   if (checkFinish()) {
     return;
   }
@@ -56,7 +60,7 @@ document.addEventListener('pointermove', (event) => updateDragInput(event));
 document.addEventListener('pointerup', (event) => toggleDragInput(event, false));
 document.addEventListener('pointercancel', (event) => toggleDragInput(event, false));
 
-function updateKeyInput(key, value) {
+function updateKeyInput(key: string, value: boolean) {
   if (value && !!activeKeys[key] || !value && !activeKeys[key]) return;
 
   activeKeys[key] = value;
@@ -67,7 +71,7 @@ function updateKeyInput(key, value) {
   if (key === 'w' || key === 'ArrowUp') input.up = value;
 }
 
-function toggleDragInput(event, active) {
+function toggleDragInput(event: PointerEvent, active: boolean) {
   if (active && !!input.dragging || !active && !input.dragging) {
     return;
   }
@@ -78,7 +82,7 @@ function toggleDragInput(event, active) {
   input.dragging = active;
 }
 
-function updateDragInput(event) {
+function updateDragInput(event: PointerEvent) {
   if (!input.dragging) return;
 
   event.preventDefault();
@@ -86,24 +90,24 @@ function updateDragInput(event) {
   input.vertical = -event.movementY * gestureSpeed;
 }
 
-function updatePosition(deltaTime) {
+function updatePosition(deltaTime: number) {
   applyDrag(deltaTime);
   updateSpeedFromInput(deltaTime);
   updateSpeedFromMaze(deltaTime);
-  
+
   position.x = clamp(position.x + speed.x, 0, 1);
   position.y = clamp(position.y + speed.y, 0, 1);
 
-  sourceImage.style.transform = `scale(${scale}) translate(${(.5 - position.x) * 100}%, ${(.5 - position.y) * 100}%)`;
-  sourceImage.style.left = `${position.x * 100}%`;
+  sourceImage.style.transform = `scale(${ scale }) translate(${ (.5 - position.x) * 100 }%, ${ (.5 - position.y) * 100 }%)`;
+  sourceImage.style.left = `${ position.x * 100 }%`;
 }
 
-function applyDrag(deltaTime) {
+function applyDrag(deltaTime: number) {
   speed.x *= (1 - drag * deltaTime / 1000);
   speed.y *= (1 - drag * deltaTime / 1000);
 }
 
-function updateSpeedFromInput(deltaTime) {
+function updateSpeedFromInput(deltaTime: number) {
   let horizontal = input.dragging ? input.horizontal : 0;
   let vertical = input.dragging ? input.vertical : 0;
 
@@ -114,9 +118,9 @@ function updateSpeedFromInput(deltaTime) {
   if (input.left) horizontal -= input.down || input.up ? .7071 : 1;
   if (input.down) vertical += input.right || input.left ? .7071 : 1;
   if (input.up) vertical -= input.right || input.left ? .7071 : 1;
-  
+
   const totalSpeed = Math.sqrt(Math.pow(horizontal, 2) + Math.pow(vertical, 2));
-  
+
   if (totalSpeed > dragSpeedLimit) {
     horizontal /= (totalSpeed / dragSpeedLimit);
     vertical /= (totalSpeed / dragSpeedLimit);
@@ -130,14 +134,16 @@ function updateSpeedFromInput(deltaTime) {
   }
 }
 
-function updateSpeedFromMaze(deltaTime) {
+function updateSpeedFromMaze(deltaTime: number) {
   const checks = getMazeData();
 
-  const wallRight = checks.right[3] !== 0;
-  const wallLeft = checks.left[3] !== 0;
-  const wallDown = checks.down[3] !== 0;
-  const wallUp = checks.up[3] !== 0;
+  const wallRight = checks.right[0] + checks.right[1] + checks.right[2] < 20;
+  const wallLeft = checks.left[0] + checks.left[1] + checks.left[2] < 20;
+  const wallDown = checks.down[0] + checks.down[1] + checks.down[2] < 20;
+  const wallUp = checks.up[0] + checks.up[1] + checks.up[2] < 20;
 
+  console.log({ wallRight, wallLeft, wallUp, wallDown });
+  
   if (wallRight) input.right = false;
   if (wallLeft) input.left = false;
   if (wallDown) input.down = false;
@@ -162,7 +168,7 @@ function checkFinish() {
   const checks = getMazeData();
 
   for (const key in checks) {
-    const data = checks[key];
+    const data: Uint8ClampedArray = checks[key];
 
     // check if color is greenish
     if (data[0] < 50 && data[1] > 200 && data[2] < 50) {
@@ -170,15 +176,15 @@ function checkFinish() {
       return true;
     }
   }
-  
+
   return false;
 }
 
-function getMazeData() {
-  const x = Math.floor(position.x * canvasSize);
-  const y = Math.floor(position.y * canvasSize);
+function getMazeData(): { [key: string]: Uint8ClampedArray } {
+  const x = Math.floor(position.x * canvas.width);
+  const y = Math.floor(position.y * canvas.height);
   const offset = 10;
-  
+
   return {
     right: ctx.getImageData(x + offset, y, 1, 1).data,
     left: ctx.getImageData(x - offset, y, 1, 1).data,
@@ -187,8 +193,6 @@ function getMazeData() {
   }
 }
 
-function clamp(value, min, max) {
+function clamp(value: number, min: number, max: number) {
   return Math.max(Math.min(value, max), min);
 }
-
-window.onload = initialize;

@@ -4,12 +4,17 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "http-server",
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "serve": "http-server -e js",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
   "license": "ISC",
   "dependencies": {
     "http-server": "^14.1.0"
+  },
+  "devDependencies": {
+    "typescript": "^4.6.2"
   }
 }
