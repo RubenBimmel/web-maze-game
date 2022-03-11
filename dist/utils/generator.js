@@ -1,4 +1,4 @@
-import { isRectangular } from './grid';
+import { isRectangular } from './grid.js';
 export function generateMaze(grid) {
     const start = getRandomStartPosition(grid.settings);
     const cells = generateMazeCells(grid, start);

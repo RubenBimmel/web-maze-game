@@ -1,4 +1,4 @@
-import { GridCell, Grid, GridSettings, isRectangular } from './grid';
+import { GridCell, Grid, GridSettings, isRectangular } from './grid.js';
 
 export interface Maze {
   settings: GridSettings;

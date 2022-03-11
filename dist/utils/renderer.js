@@ -1,4 +1,4 @@
-import { isRectangular } from './grid';
+import { isRectangular } from './grid.js';
 export class Renderer {
     constructor(canvas, maze, style) {
         this.canvas = canvas;

@@ -1,5 +1,5 @@
-import { Maze } from './generator';
-import { isRectangular, Position } from './grid';
+import { Maze } from './generator.js';
+import { isRectangular, Position } from './grid.js';
 
 export interface Style {
   wallColor: string;

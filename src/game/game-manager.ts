@@ -1,5 +1,5 @@
 /* elements */
-import { Maze } from '../utils/generator';
+import { Maze } from '../utils/generator.js';
 
 let canvas: HTMLCanvasElement;
 let ctx: CanvasRenderingContext2D;

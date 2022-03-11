@@ -1,6 +1,6 @@
-import { generateMaze } from './utils/generator';
-import { generateGrid, GridTypes } from './utils/grid';
-import { Renderer, Style } from './utils/renderer';
+import { generateMaze } from './utils/generator.js';
+import { generateGrid, GridTypes } from './utils/grid.js';
+import { Renderer, Style } from './utils/renderer.js';
 
 const width = 10;
 const height = 10;
