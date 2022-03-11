@@ -18,8 +18,6 @@ function generateMazeCells(grid, start) {
     while (visitedCells.length < cells.length) {
         const availableNeighbours = cells[currentIndex].neighbours.filter((n) => visitedCells.indexOf(n) === -1);
         if (availableNeighbours.length === 0 || currentBranchDistance >= grid.settings.maxBranchDistance) {
-            if (currentBranchDistance >= grid.settings.maxBranchDistance)
-                console.log('MAX BRANCH DISTANCE REACHED!');
             currentIndex = visitedCells[visitedCells.indexOf(currentIndex) - 1];
             currentBranchDistance = 0;
             continue;
